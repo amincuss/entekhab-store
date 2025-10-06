@@ -29,19 +29,21 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # 5- کپی کل پروژه به E:\react (Full Release) فقط اگر بیلد موفق بود
+      # 5- کپی کل پروژه (Full Release) با overwrite
       - name: Copy full project to E:\react
         if: ${{ success() }}
-        shell: cmd
+        shell: powershell
         run: |
-          echo شروع کپی کامل پروژه (Full Release)...
-          xcopy . E:\react /E /H /C /I /Y /V
+          Write-Host "شروع کپی کامل پروژه (Full Release)..."
+          xcopy . "E:\react" /E /H /C /I /Y /V
+          Write-Host "نمایش فایل‌های موجود بعد از کپی:"
+          dir "E:\react" -Recurse
 
-          echo نمایش فایل‌های موجود بعد از کپی:
-          dir E:\react /s
-
-      # 6- ریستارت PM2
-      - name: Restart PM2
+      # 6- رفتن به مسیر پروژه و ریستارت PM2 با PowerShell
+      - name: Restart PM2 from project directory
         if: ${{ success() }}
-        shell: cmd
-        run: pm2 restart api
+        shell: powershell
+        run: |
+          Set-Location "E:\react"
+          pm2 restart api
+          Write-Host "PM2 سرویس api را ریستارت کرد."
