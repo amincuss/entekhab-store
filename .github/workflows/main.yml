@@ -43,5 +43,10 @@ jobs:
       - name: Run PM2 restart from pm1.bat
         if: ${{ success() }}
         shell: cmd
-        run: |
-          E:\react\pm1.bat
+       run: |
+    echo شروع اجرای pm1.bat ...
+    E:\react\pm1.bat 2>&1
+    if errorlevel 1 (
+      echo ::error::PM2 restart failed with errorlevel %errorlevel%
+      exit /b %errorlevel%
+    )
