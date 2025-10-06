@@ -1,0 +1,10 @@
+.custom-pagination .swiper-pagination-bullet {
+  @apply bg-gray-600 w-1.5 h-1.5 rounded-full transition;
+}
+
+.custom-pagination .swiper-pagination-bullet-active {
+  @apply bg-gray-400 w-5 h-1.5;
+}
+.custom-pagination .swiper-scrollbar-drag {
+  @apply bg-gradient-to-r from-secondary via-primary to-tertiary;
+}

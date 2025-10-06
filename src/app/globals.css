@@ -1,0 +1,49 @@
+@import "../theme/themeTailwind.css";
+@import "../styles/Vazirmatn-font-face.css";
+@import "../styles/Vazirmatn-FD-NL-font-face.css";
+@import "../styles/SwiperStyle.css";
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE & Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+
+.gradient-border {
+  position: relative;
+  border-radius: 0.75rem; /* برابر با rounded-xl */
+  overflow: hidden;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: conic-gradient(
+    #ff0080,
+    #ff8c00,
+    #40e0d0,
+    #ff0080
+  );
+  animation: rotate 6s linear infinite;
+}
+
+.gradient-border > * {
+  position: relative;
+  z-index: 1;
+  background: white; /* یا رنگ داخلی کارت */
+  border-radius: inherit;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@theme {
+ --color-primary: #1446aa;
+ --color-secondary: #faae2e;
+ --color-tertiary: #08234f;
+ --font-Vazirmatn: "Vazirmatn";
+}
