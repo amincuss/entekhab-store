@@ -39,11 +39,23 @@ jobs:
           Write-Host "نمایش فایل‌های موجود بعد از کپی:"
           dir "E:\react" -Recurse
 
-      # 6- رفتن به مسیر پروژه و ریستارت PM2 با PowerShell
+      # 6- رفتن به مسیر پروژه و اجرای PM2 از مسیر کامل
       - name: Restart PM2 from project directory
         if: ${{ success() }}
         shell: powershell
         run: |
+          # تغییر مسیر به پوشه پروژه
           Set-Location "E:\react"
-          pm2 restart api
+
+          # مسیر کامل PM2 برای ویندوز (Global npm bin)
+          $pm2Path = "$env:USERPROFILE\AppData\Roaming\npm\pm2.cmd"
+
+          if (-Not (Test-Path $pm2Path)) {
+            Write-Host "مسیر PM2 پیدا نشد، لطفاً مسیر نصب Global pm2 را بررسی کنید."
+            exit 1
+          }
+
+          # ریستارت سرویس api در PM2
+          & $pm2Path restart api
+
           Write-Host "PM2 سرویس api را ریستارت کرد."
