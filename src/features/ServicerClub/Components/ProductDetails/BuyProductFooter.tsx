@@ -21,8 +21,7 @@ type BuyProductFooterProps = {
 };
 
 function BuyProductFooter({ price, productId }: BuyProductFooterProps) {
-  const userScore =
-    useSelector((state: RootState) => state.user.UserScore) || 0;
+  const userScore = useSelector((state: RootState) => state.auth.currentScore);
   const agencyCode = useSelector((state: RootState) => state.auth.agencyCode);
 
   const { showMessage } = useSnackbar();

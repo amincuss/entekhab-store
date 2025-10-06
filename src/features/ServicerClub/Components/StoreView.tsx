@@ -1,52 +1,23 @@
 "use client";
 
 import Empty from "@/components/Empty";
-import { setAgencyCode } from "@/store/slices/authSlice";
-import { AppDispatch, RootState } from "@/store/store";
-import { useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetServicerCurrentScore } from "../hooks/useGetServicerCurrentScore";
+import { RootState } from "@/store/store";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
 import { useGetServicersClubSlides } from "../hooks/useGetServicersClubSlides";
-import { setUserScore } from "../redux/userSlice";
 import { TCategory, TProduct } from "../type";
 import CategoryPreviewList from "./CategoryPreviewList";
 import StoreHeader from "./StoreHeader";
 import StoreSlider from "./StoreSlider";
 
 export default function StoreView() {
-  const dispatch = useDispatch<AppDispatch>();
-  const agencyCode = useSelector((state: RootState) => state.auth.agencyCode);
-
-  useEffect(() => {
-    if (agencyCode) {
-      dispatch(setAgencyCode(agencyCode));
-    }
-  }, [agencyCode, dispatch]);
-
-  // const { data: productData, isLoading } = useGetProductList({ enabled: true });
   const { data: sliders, isSuccess: isSlidesSuccess } =
     useGetServicersClubSlides({ enabled: true });
 
-  const { data: CurrentScore, isSuccess: isSuccessCurrentScore } =
-    useGetServicerCurrentScore(agencyCode!);
-
-  // // ذخیره داده در ریداکس
-  // useEffect(() => {
-  //   if (productData) dispatch(setData(productData.Data));
-  // }, [productData, dispatch]);
   const Products = useSelector((state: RootState) => state.rewards.Products);
   const Categories = useSelector(
     (state: RootState) => state.rewards.Categories
   );
-  useEffect(() => {
-    if (
-      isSuccessCurrentScore &&
-      CurrentScore?.IsSuccess &&
-      CurrentScore.Data.Score
-    ) {
-      dispatch(setUserScore(CurrentScore.Data.Score));
-    }
-  }, [isSuccessCurrentScore, CurrentScore, dispatch, agencyCode]);
 
   const categoriesWithProducts = useMemo(() => {
     if (!Categories) return [];

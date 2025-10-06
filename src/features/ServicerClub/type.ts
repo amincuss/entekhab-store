@@ -1,21 +1,10 @@
-// تایپ یک دسته بندی
-
-// type.ts
-export interface TCategory {
-  Title: string;
-  Image: string;
-  Description: string;
-  LowestPrice: number | null;
-  HighestPrice: number | null;
-}
-
 export interface TGetServicerCurrentScore {
   Score: number;
-  Categories: TCategory[];
+  StoreURL: string;
 }
 
 export interface SliderItem {
- Id: string;
+  Id: string;
   Name: string;
   Url: string;
   Link: string;

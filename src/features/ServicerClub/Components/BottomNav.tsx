@@ -1,37 +1,19 @@
 "use client";
 
-import { setAgencyCode, setCurrentScore } from "@/store/slices/authSlice";
-import { AppDispatch, RootState } from "@/store/store";
+import { RootState } from "@/store/store";
 import { Badge, BottomNavigation, BottomNavigationAction } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaHistory } from "react-icons/fa";
 import { FaUserLarge } from "react-icons/fa6";
 import { IoStorefront } from "react-icons/io5";
-// import { MdOutlineFavorite } from "react-icons/md";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetServicerCurrentScore } from "../hooks/useGetServicerCurrentScore";
+import { useSelector } from "react-redux";
 
-export default function BottomNav({ agencyCode }: { agencyCode: string }) {
-  const dispatch = useDispatch<AppDispatch>();
-
-  useEffect(() => {
-    if (agencyCode) {
-      dispatch(setAgencyCode(agencyCode));
-    }
-  }, [agencyCode, dispatch]);
+export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [value, setValue] = useState(1); // پیش‌فرض Store
 
-  const { data: CurrentScore, isSuccess: isSuccessCurrentScore } =
-    useGetServicerCurrentScore(agencyCode);
-
-  useEffect(() => {
-    if (isSuccessCurrentScore && CurrentScore && CurrentScore?.IsSuccess) {
-      dispatch(setCurrentScore(CurrentScore?.Data.Score));
-    }
-  }, [isSuccessCurrentScore, CurrentScore, dispatch]);
   const CurrentScoreRedux = useSelector(
     (state: RootState) => state.auth.currentScore
   );
@@ -39,7 +21,7 @@ export default function BottomNav({ agencyCode }: { agencyCode: string }) {
     if (pathname.includes("profile")) setValue(0);
     else if (pathname.includes("store") || pathname === "/") setValue(1);
     else if (pathname.includes("history")) setValue(2);
-  }, [pathname, CurrentScore, dispatch]);
+  }, [pathname, CurrentScoreRedux]);
 
   return (
     <div className="h-auto w-full bg-white shadow-lg z-10 border-t border-gray-200">

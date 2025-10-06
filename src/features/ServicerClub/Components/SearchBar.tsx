@@ -1,12 +1,9 @@
 "use client";
-import Loading from "@/app/loading";
-import { AppDispatch, RootState } from "@/store/store";
+import { RootState } from "@/store/store";
 import { useEffect, useState } from "react";
 import { CgClose } from "react-icons/cg";
 import { FiSearch } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetProductList } from "../hooks/useGetProductList";
-import { setData } from "../redux/rewardsSlice";
+import { useSelector } from "react-redux";
 
 import Empty from "@/components/Empty";
 import {
@@ -21,7 +18,6 @@ import { IoIosArrowDown } from "react-icons/io";
 import { TProduct } from "../type";
 
 function SearchBar() {
-  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   const Products = useSelector((state: RootState) => state.rewards.Products);
@@ -32,14 +28,6 @@ function SearchBar() {
   const [filteredProducts, setFilteredProducts] = useState<TProduct[]>([]);
   const [openDropdown, setOpenDropdown] = useState(false);
 
-  const { data: productData, isLoading } = useGetProductList({ enabled: true });
-
-  // ذخیره داده‌ها در ریداکس
-  useEffect(() => {
-    if (productData) dispatch(setData(productData.Data));
-  }, [productData, dispatch]);
-
-  // فیلتر کردن محصولات بر اساس سرچ
   useEffect(() => {
     if (searchText.trim() === "") {
       setFilteredProducts([]);
@@ -123,8 +111,6 @@ function SearchBar() {
       </div>
     );
   }
-  if (isLoading) return <Loading />;
-
   return (
     <div className="w-full relative p-2">
       <div className="rounded-md flex items-center w-full border border-gray-100 bg-gray-100 p-2 text-xs">

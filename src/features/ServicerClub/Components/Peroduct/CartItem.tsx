@@ -14,7 +14,7 @@ interface CartItemProps {
 
 export default function CartItem({ product, mainPage = false }: CartItemProps) {
   const pathname = usePathname();
-  const userScore = useSelector((state: RootState) => state.user.UserScore) ?? 0;
+  const userScore = useSelector((state: RootState) => state.auth.currentScore);
   const percentage =
     userScore >= product.Price
       ? 100

@@ -6,6 +6,7 @@ import AppProviders from "@/providers/AppProviders";
 import { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import "./globals.css";
+import StoreInitializer from "./(servicerClub)/StoreInitializer";
 
 export const metadata: Metadata = {
   title: "ServicerClub",
@@ -67,12 +68,15 @@ export default async function RootLayout({
     <html lang="fa" dir="rtl">
       <body className="rtl">
         <AppProviders>
-          <div className="h-screen w-full flex flex-col maineLayout">
-            <div className="flex-1 overflow-auto">
-              <ForceBackToStore/>
-              {children}</div>
-            <BottomNav agencyCode={agencyCode} />
-          </div>
+          <StoreInitializer agencyCode={agencyCode}>
+            <div className="h-screen w-full flex flex-col maineLayout">
+              <div className="flex-1 overflow-auto">
+                <ForceBackToStore />
+                {children}
+              </div>
+              <BottomNav />
+            </div>
+          </StoreInitializer>
         </AppProviders>
       </body>
     </html>
