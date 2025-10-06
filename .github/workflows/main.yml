@@ -8,48 +8,49 @@ on:
 jobs:
   build-deploy:
     runs-on: self-hosted
-
     env:
       ACTIONS_STEP_DEBUG: true
+      CI: true
 
     steps:
-      # 1- دریافت سورس کد
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2- تنظیم Node.js نسخه 20 با کش npm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      # 3- نصب وابستگی‌ها
       - name: Install dependencies
-        run: npm ci
+        run: npm ci 2>&1
 
-      # 4- بیلد پروژه
-      - name: Build project
-        run: npm run build
+      - name: Build project (verbose)
+        shell: cmd
+        run: |
+          echo Starting build...
+          npm run build 2>&1
+          if errorlevel 1 (
+            echo ::error::Build failed with exit code %errorlevel%
+            exit /b %errorlevel%
+          )
 
-      # 5- کپی کل پروژه به E:\react با حالت Overwrite کامل
       - name: Copy full project
         if: ${{ success() }}
         shell: powershell
         run: |
-          Write-Host "شروع کپی کامل پروژه..."
+          Write-Host "Copying project files..."
           xcopy . "E:\react" /E /H /C /I /Y /V
-          Write-Host "محتوای پوشه E:\react بعد از کپی:"
+          Write-Host "Content after copy:"
           dir "E:\react" -Recurse
 
-      # 6- اجرای فایل pm1.bat با نمایش کامل لاگ و خطا
-      - name: Run PM2 restart via pm1.bat
+      - name: Run PM2 restart via pm1.bat (verbose)
         if: ${{ success() }}
         shell: cmd
         run: |
-          echo شروع اجرای pm1.bat ...
+          echo Running pm1.bat...
           E:\react\pm1.bat 2>&1
           if errorlevel 1 (
-            echo ::error::PM2 restart failed with errorlevel %errorlevel%
+            echo ::error::PM2 restart failed with exit code %errorlevel%
             exit /b %errorlevel%
           )
