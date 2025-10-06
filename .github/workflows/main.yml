@@ -1,4 +1,4 @@
-name: Next.js Build & Deploy to E:\react
+name: Next.js Full Release Deploy to E:\react
 
 on:
   push:
@@ -10,40 +10,37 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # 1- چک‌اوت سورس کد
+      # 1- گرفتن سورس کد
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2- تنظیم Node.js
+      # 2- تنظیم Node.js نسخه 20 با کش npm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      # 3- نصب کتابخانه‌ها
+      # 3- نصب وابستگی‌ها
       - name: Install dependencies
         run: npm ci
 
-      # 4- بیلد پروژه Next.js
+      # 4- بیلد پروژه
       - name: Build project
         run: npm run build
 
-      # 5- کپی فایل‌ها فقط اگر بیلد موفق بود (Overwrite)
-      - name: Copy build output to E:\react
+      # 5- کپی کل پروژه به E:\react (Full Release) فقط اگر بیلد موفق بود
+      - name: Copy full project to E:\react
         if: ${{ success() }}
         shell: cmd
         run: |
-          echo شروع کپی (Overwrite) فایل‌ها...
-          xcopy .next E:\react\.next /E /H /C /I /Y /V
-          xcopy package.json E:\react /H /C /I /Y /V
-          xcopy package-lock.json E:\react /H /C /I /Y /V
-          xcopy public E:\react\public /E /H /C /I /Y /V
+          echo شروع کپی کامل پروژه (Full Release)...
+          xcopy . E:\react /E /H /C /I /Y /V
 
           echo نمایش فایل‌های موجود بعد از کپی:
           dir E:\react /s
 
-      # 6- ریستارت سرویس PM2
+      # 6- ریستارت PM2
       - name: Restart PM2
         if: ${{ success() }}
         shell: cmd
