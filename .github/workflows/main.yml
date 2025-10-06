@@ -51,4 +51,4 @@ jobs:
       # ریستارت PM2 بعد از دیپلوی
       - name: Restart PM2
         shell: cmd
-        run: pm2 restart my-server
+        run: pm2 restart api
