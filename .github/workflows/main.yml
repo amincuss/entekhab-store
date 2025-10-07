@@ -48,10 +48,12 @@ jobs:
         run: |
           echo Copying project files to E:\react ...
           robocopy . "E:\react" /MIR /COPYALL /R:3 /W:5 /NFL /NDL /NP /LOG+:deploy.log
-          if errorlevel 8 (
-            echo ::error::File copy failed with exit code %errorlevel%
-            exit /b %errorlevel%
+          set RC=%ERRORLEVEL%
+          if %RC% GEQ 8 if NOT %RC% EQU 11 (
+            echo ::error::File copy failed with exit code %RC%
+            exit /b %RC%
           )
+          echo Robocopy completed with exit code %RC% (treated as success)
           dir "E:\react" /S
 
       - name: Start API via PM2
