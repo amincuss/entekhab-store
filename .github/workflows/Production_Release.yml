@@ -1,4 +1,4 @@
-name: Next.js Release Copy to E:\store
+name: Production_Release
 
 on:
   workflow_dispatch:   # اجرای دستی برای ریلیز
