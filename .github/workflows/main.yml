@@ -54,10 +54,11 @@ jobs:
             /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
             /NFL /NDL /NP /LOG+:deploy.log
 
+          rem --- کنترل کد خروج ---
           set RC=%ERRORLEVEL%
           if %RC% EQU 16 (
             echo ::error::Robocopy fatal error (exit code 16 - no files copied)
-            exit /b %RC%
+            exit /b 16
           )
           if %RC% EQU 11 (
             echo Robocopy completed with exit code 11 (treated as success)
@@ -68,7 +69,7 @@ jobs:
             exit /b %RC%
           )
           echo Robocopy completed with exit code %RC% (treated as success)
-          dir "E:\react" /S
+          exit /b 0
 
       - name: Start API via PM2
         shell: cmd
