@@ -1,4 +1,4 @@
-name: Next.js Full Release Deploy to E:\react
+name: Test_Release
 
 on:
   push:
