@@ -23,7 +23,14 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci 2>&1
+        shell: cmd
+        run: |
+          echo Installing dependencies...
+          npm ci 2>&1
+          if errorlevel 1 (
+            echo ::error::Install failed with exit code %errorlevel%
+            exit /b %errorlevel%
+          )
 
       - name: Build project (verbose)
         shell: cmd
@@ -35,22 +42,30 @@ jobs:
             exit /b %errorlevel%
           )
 
-      - name: Copy full projects
-        if: ${{ success() }}
-        shell: powershell
-        run: |
-          Write-Host "Copying project files..."
-          xcopy . "E:\react" /E /H /C /I /Y /V
-          Write-Host "Content after copy:"
-          dir "E:\react" -Recurse
-
-      - name: Run PM2 restart via pm1.bat (verbose)
+      - name: Copy full project to E:\react
         if: ${{ success() }}
         shell: cmd
         run: |
-          echo Running pm1.bat...
-          E:\react\pm1.bat 2>&1
-          if errorlevel 1 (
-            echo ::error::PM2 restart failed with exit code %errorlevel%
+          echo Copying project files to E:\react ...
+          robocopy . "E:\react" /MIR /COPYALL /R:3 /W:5 /NFL /NDL /NP /LOG+:deploy.log
+          if errorlevel 8 (
+            echo ::error::File copy failed with exit code %errorlevel%
             exit /b %errorlevel%
           )
+          dir "E:\react" /S
+
+      - name: Start API via PM2
+        shell: cmd
+        run: |
+          cd /d E:\react
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop api
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete api
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name api
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
+
+      - name: Show last 50 log lines for API
+        if: ${{ success() }}
+        shell: cmd
+        run: |
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" logs api --lines 50
