@@ -51,7 +51,12 @@ jobs:
             /XD ".git" ".github" "tests" "docs" ".next/cache" ^
             /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
             /NFL /NDL /NP /LOG+:deploy.log
+
           set RC=%ERRORLEVEL%
+          if %RC% EQU 16 (
+            echo ::error::Robocopy fatal error (exit code 16 - no files copied)
+            exit /b %RC%
+          )
           if %RC% GEQ 8 if NOT %RC% EQU 11 (
             echo ::error::File copy failed with exit code %RC%
             exit /b %RC%
@@ -68,5 +73,3 @@ jobs:
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name api
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
-
-  
