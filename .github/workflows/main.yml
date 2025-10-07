@@ -42,12 +42,15 @@ jobs:
             exit /b %errorlevel%
           )
 
-      - name: Copy full project to E:\react
+      - name: Copy project to E:\react without deleting existing files
         if: ${{ success() }}
         shell: cmd
         run: |
-          echo Copying project files to E:\react ...
-          robocopy . "E:\react" /MIR /COPYALL /R:3 /W:5 /NFL /NDL /NP /LOG+:deploy.log
+          echo Copying project files to E:\react without removing existing ones ...
+          robocopy . "E:\react" /E /COPYALL /R:3 /W:5 ^
+            /XD ".git" ".github" "tests" "docs" ".next/cache" ^
+            /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
+            /NFL /NDL /NP /LOG+:deploy.log
           set RC=%ERRORLEVEL%
           if %RC% GEQ 8 if NOT %RC% EQU 11 (
             echo ::error::File copy failed with exit code %RC%
