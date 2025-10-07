@@ -35,7 +35,7 @@ jobs:
             exit /b %errorlevel%
           )
 
-      - name: Copy full project
+      - name: Copy full projects
         if: ${{ success() }}
         shell: powershell
         run: |
