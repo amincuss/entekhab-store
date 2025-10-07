@@ -1,4 +1,4 @@
-name: Production_Release
+name: Next.js Release Copy to E:\store
 
 on:
   workflow_dispatch:   # اجرای دستی برای ریلیز
@@ -32,10 +32,12 @@ jobs:
 
           robocopy "E:\react" "E:\store" /E /COPY:DAT /R:3 /W:5 ^
             /NFL /NDL /NP /TEE /V ^
+            /XF "web.config" "server.js" ^
             /LOG+:"E:\actions-runner\_work\release-copy.log" ^
             || exit /b 0
 
           echo ✅ Release copy completed. Files with same name were overwritten, others untouched.
+          echo ❌ web.config و server.js عمداً کپی نشدند.
 
       - name: Start PM2 Production_server after copy
         shell: cmd
