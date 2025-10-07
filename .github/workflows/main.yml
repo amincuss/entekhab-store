@@ -69,8 +69,4 @@ jobs:
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
 
-      - name: Show last 50 log lines for API
-        if: ${{ success() }}
-        shell: cmd
-        run: |
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" logs api --lines 50
+  
