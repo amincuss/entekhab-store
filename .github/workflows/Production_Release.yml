@@ -16,7 +16,7 @@ jobs:
       CI: true
 
     steps:
-      - name: Stop PM2 test_server before copy
+      - name: Stop PM2 test_server Production_server before copy
         shell: cmd
         run: |
           echo Stopping PM2 service: test_server ...
