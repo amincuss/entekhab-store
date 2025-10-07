@@ -47,6 +47,7 @@ jobs:
         shell: cmd
         run: |
           echo Copying project files to E:\react without removing existing ones ...
+          if not exist "E:\react" mkdir "E:\react"
           robocopy . "E:\react" /E /COPYALL /R:3 /W:5 ^
             /XD ".git" ".github" "tests" "docs" ".next/cache" ^
             /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
@@ -57,7 +58,11 @@ jobs:
             echo ::error::Robocopy fatal error (exit code 16 - no files copied)
             exit /b %RC%
           )
-          if %RC% GEQ 8 if NOT %RC% EQU 11 (
+          if %RC% EQU 11 (
+            echo Robocopy completed with exit code 11 (treated as success)
+            exit /b 0
+          )
+          if %RC% GEQ 8 (
             echo ::error::File copy failed with exit code %RC%
             exit /b %RC%
           )
