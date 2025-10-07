@@ -42,14 +42,12 @@ jobs:
             exit /b %errorlevel%
           )
 
-      - name: Stop PM2 and Node processes before copy
+      - name: Stop PM2 service before copy
         shell: cmd
         run: |
-          echo Stopping PM2 services...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop all || echo Stop failed, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete all || echo Delete failed, continuing...
-          echo Killing any Node.js processes...
-          taskkill /F /IM node.exe || echo No Node process found.
+          echo Stopping PM2 service: test_server ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Stop failed, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete test_server || echo Delete failed, continuing...
 
       - name: Copy project to E:\react (No ACL copy, full log)
         shell: cmd
@@ -72,6 +70,6 @@ jobs:
         run: |
           echo Forcing PM2 start...
           cd /d E:\react
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name api
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name test_server
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
