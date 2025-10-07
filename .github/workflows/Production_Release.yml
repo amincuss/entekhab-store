@@ -1,7 +1,7 @@
-name: Production Release
+name: Test_Release
 
 on:
-  workflow_dispatch:   # اجرای دستی برای ریلیز
+  workflow_dispatch:
     inputs:
       confirm_release:
         description: 'تأیید انتشار به E:\store ؟'
@@ -16,12 +16,11 @@ jobs:
       CI: true
 
     steps:
-      - name: Stop PM2 Production_server before copy
+      - name: Stop PM2 test_server before copy
         shell: cmd
         run: |
-          echo Stopping PM2 service: Production_server ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop Production_server || echo Service not running, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete Production_server || echo Service deletion failed or not found, continuing...
+          echo Stopping PM2 service: test_server ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Service not running, continuing...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
 
       - name: Copy updated files from E:\react to E:\store (overwrite only same names)
@@ -39,11 +38,10 @@ jobs:
           echo ✅ Release copy completed. Files with same name were overwritten, others untouched.
           echo ❌ web.config و server.js عمداً کپی نشدند.
 
-      - name: Start PM2 Production_server after copy
+      - name: Restart PM2 test_server after copy
         shell: cmd
         run: |
-          echo Starting PM2 service: Production_server ...
-          cd /d E:\store
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name Production_server || echo PM2 start failed, continuing...
+          echo Restarting PM2 service: test_server ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start test_server || echo PM2 start failed, continuing...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
