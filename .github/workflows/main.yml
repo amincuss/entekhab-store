@@ -13,7 +13,7 @@ jobs:
       CI: true
 
     steps:
-      - name: Checkout codes
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
