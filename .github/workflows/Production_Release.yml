@@ -1,0 +1,47 @@
+name: Production_Release
+on:
+  workflow_dispatch:   # اجرای دستی برای ریلیز
+    inputs:
+      confirm_release:
+        description: 'تأیید انتشار به E:\store ؟'
+        required: true
+        default: 'yes'
+
+jobs:
+  release-copy:
+    runs-on: self-hosted
+    env:
+      ACTIONS_STEP_DEBUG: true
+      CI: true
+      PM2_PATH: "%USERPROFILE%\\AppData\\Roaming\\npm\\pm2.cmd"
+
+    steps:
+      - name: Stop PM2 Production_server before copy
+        shell: cmd
+        run: |
+          echo Stopping PM2 service: Production_server ...
+          "%PM2_PATH%" stop Production_server || echo Service not running, continuing...
+          "%PM2_PATH%" delete Production_server || echo Service deletion failed or not found, continuing...
+          "%PM2_PATH%" list
+
+      - name: Copy updated files from E:\react to E:\store (overwrite only same names)
+        shell: cmd
+        run: |
+          echo Starting selective overwrite from E:\react to E:\store ...
+          if not exist "E:\store" mkdir "E:\store"
+
+          robocopy "E:\react" "E:\store" /E /COPY:DAT /R:3 /W:5 ^
+            /NFL /NDL /NP /TEE /V ^
+            /LOG+:"E:\actions-runner\_work\release-copy.log" ^
+            || exit /b 0
+
+          echo ✅ Release copy completed. Files with same name were overwritten, others untouched.
+
+      - name: Start PM2 Production_server after copy
+        shell: cmd
+        run: |
+          echo Starting PM2 service: Production_server ...
+          cd /d E:\store
+          "%PM2_PATH%" start server.js --name Production_server || echo PM2 start failed, continuing...
+          "%PM2_PATH%" save
+          "%PM2_PATH%" list
