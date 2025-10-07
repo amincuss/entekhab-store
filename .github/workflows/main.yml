@@ -46,8 +46,8 @@ jobs:
         shell: cmd
         run: |
           echo Stopping PM2 services...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop all
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete all
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop all || echo Stop failed, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete all || echo Delete failed, continuing...
           echo Killing any Node.js processes...
           taskkill /F /IM node.exe || echo No Node process found.
 
@@ -61,14 +61,16 @@ jobs:
             /XD ".git" ".github" "tests" "docs" ".next/cache" ^
             /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
             /NFL /NDL /NP /TEE /V /LOG+:"E:\actions-runner\_work\entekhab-store\entekhab-store\deploy.log" ^
-            || exit /b 0
+            || echo Robocopy returned an error but continuing...
 
           echo Directory after copy:
           dir "E:\react" /S
 
-      - name: Start API via PM2
+      - name: Force Start API via PM2 (Always run)
+        if: always()
         shell: cmd
         run: |
+          echo Forcing PM2 start...
           cd /d E:\react
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name api
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
