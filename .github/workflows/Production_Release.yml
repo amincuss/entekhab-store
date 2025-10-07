@@ -40,7 +40,7 @@ jobs:
           echo ✅ Release copy completed. Files with same name were overwritten, others untouched.
           echo ❌ web.config و server.js عمداً کپی نشدند.
 
-      - name: Restart PM2 test_server after copy
+      - name: Restart PM2 test_server Production_server after copy
         shell: cmd
         run: |
           echo Restarting PM2 service: test_server ...
