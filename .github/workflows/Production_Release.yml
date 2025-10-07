@@ -1,4 +1,4 @@
-name: Test_Release
+name: Production_Release
 
 on:
   workflow_dispatch:
