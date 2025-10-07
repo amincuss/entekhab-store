@@ -48,6 +48,7 @@ jobs:
         run: |
           echo Copying project files to E:\react without removing existing ones ...
           if not exist "E:\react" mkdir "E:\react"
+
           robocopy . "E:\react" /E /COPYALL /R:3 /W:5 ^
             /XD ".git" ".github" "tests" "docs" ".next/cache" ^
             /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
