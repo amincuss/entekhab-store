@@ -1,4 +1,5 @@
-name: Production_Release
+name: Next.js Release Copy to E:\store
+
 on:
   workflow_dispatch:   # اجرای دستی برای ریلیز
     inputs:
@@ -13,16 +14,15 @@ jobs:
     env:
       ACTIONS_STEP_DEBUG: true
       CI: true
-      PM2_PATH: "%USERPROFILE%\\AppData\\Roaming\\npm\\pm2.cmd"
 
     steps:
       - name: Stop PM2 Production_server before copy
         shell: cmd
         run: |
           echo Stopping PM2 service: Production_server ...
-          "%PM2_PATH%" stop Production_server || echo Service not running, continuing...
-          "%PM2_PATH%" delete Production_server || echo Service deletion failed or not found, continuing...
-          "%PM2_PATH%" list
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop Production_server || echo Service not running, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete Production_server || echo Service deletion failed or not found, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
 
       - name: Copy updated files from E:\react to E:\store (overwrite only same names)
         shell: cmd
@@ -42,6 +42,6 @@ jobs:
         run: |
           echo Starting PM2 service: Production_server ...
           cd /d E:\store
-          "%PM2_PATH%" start server.js --name Production_server || echo PM2 start failed, continuing...
-          "%PM2_PATH%" save
-          "%PM2_PATH%" list
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name Production_server || echo PM2 start failed, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
