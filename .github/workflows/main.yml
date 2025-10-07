@@ -1,75 +1,47 @@
 name: Test_Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      confirm_release:
+        description: 'تأیید انتشار به E:\store ؟'
+        required: true
+        default: 'yes'
 
 jobs:
-  build-deploy:
+  release-copy:
     runs-on: self-hosted
     env:
       ACTIONS_STEP_DEBUG: true
       CI: true
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        shell: cmd
-        run: |
-          echo Installing dependencies...
-          npm ci 2>&1
-          if errorlevel 1 (
-            echo ::error::Install failed with exit code %errorlevel%
-            exit /b %errorlevel%
-          )
-
-      - name: Build project (verbose)
-        shell: cmd
-        run: |
-          echo Starting build...
-          npm run build 2>&1
-          if errorlevel 1 (
-            echo ::error::Build failed with exit code %errorlevel%
-            exit /b %errorlevel%
-          )
-
-      - name: Stop PM2 service before copy
+      - name: Stop PM2 test_server before copy
         shell: cmd
         run: |
           echo Stopping PM2 service: test_server ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Stop failed, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" delete test_server || echo Delete failed, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Service not running, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
 
-      - name: Copy project to E:\react (No ACL copy, full log)
+      - name: Copy updated files from E:\react to E:\store (overwrite only same names)
         shell: cmd
         run: |
-          echo Copying project files...
-          if not exist "E:\react" mkdir "E:\react"
+          echo Starting selective overwrite from E:\react to E:\store ...
+          if not exist "E:\store" mkdir "E:\store"
 
-          robocopy . "E:\react" /E /COPY:DAT /R:3 /W:5 ^
-            /XD ".git" ".github" "tests" "docs" ".next/cache" ^
-            /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
-            /NFL /NDL /NP /TEE /V /LOG+:"E:\actions-runner\_work\entekhab-store\entekhab-store\deploy.log" ^
-            || echo Robocopy returned an error but continuing...
+          robocopy "E:\react" "E:\store" /E /COPY:DAT /R:3 /W:5 ^
+            /NFL /NDL /NP /TEE /V ^
+            /XF "web.config" "server.js" ^
+            /LOG+:"E:\actions-runner\_work\release-copy.log" ^
+            || exit /b 0
 
-          echo Directory after copy:
-          dir "E:\react" /S
+          echo ✅ Release copy completed. Files with same name were overwritten, others untouched.
+          echo ❌ web.config و server.js عمداً کپی نشدند.
 
-      - name: Force Start API via PM2 (Always run)
-        if: always()
+      - name: Restart PM2 test_server after copy
         shell: cmd
         run: |
-          echo Forcing PM2 start...
-          cd /d E:\react
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name test_server
+          echo Restarting PM2 service: test_server ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start test_server || echo PM2 start failed, continuing...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
