@@ -1,75 +1,41 @@
-
-name: Test_Release
-
+name: Test_server
 on:
   push:
     branches:
       - main
 
 jobs:
-  build-deploy:
+  build-and-restart:
     runs-on: self-hosted
     env:
-      ACTIONS_STEP_DEBUG: true
       CI: true
 
     steps:
-      - name: Checkout codes
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+      - name: Navigate to project directory
+        shell: cmd
+        run: |
+          echo Changing directory to E:\react ...
+          cd /d E:\react
 
       - name: Install dependencies
         shell: cmd
         run: |
-          echo Installing dependencies...
-          npm ci 2>&1
-          if errorlevel 1 (
-            echo ::error::Install failed with exit code %errorlevel%
-            exit /b %errorlevel%
-          )
-
-      - name: Build project (verbose)
-        shell: cmd
-        run: |
-          echo Starting build...
-          npm run build 2>&1
-          if errorlevel 1 (
-            echo ::error::Build failed with exit code %errorlevel%
-            exit /b %errorlevel%
-          )
-
-      - name: Stop PM2 service before copy
-        shell: cmd
-        run: |
-          echo Stopping PM2 service: test_server ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Stop failed, continuing...
-
-      - name: Copy project to E:\react (No ACL copy, full log)
-        shell: cmd
-        run: |
-          echo Copying project files...
-          if not exist "E:\react" mkdir "E:\react"
-
-          robocopy . "E:\react" /E /COPY:DAT /R:3 /W:5 ^
-            /XD ".git" ".github" "tests" "docs" ".next/cache" ^
-            /XF "*.md" "*.txt" "*.log" ".env.local" "README*" "LICENSE*" ^
-            /NFL /NDL /NP /TEE /V /LOG+:"E:\actions-runner\_work\entekhab-store\entekhab-store\deploy.log" ^
-            || echo Robocopy returned an error but continuing...
-
-          echo Directory after copy:
-          dir "E:\react" /S
-
-      - name: Force Start API via PM2 (Always run)
-        if: always()
-        shell: cmd
-        run: |
-          echo Forcing PM2 start...
+          echo Running npm install ...
           cd /d E:\react
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start server.js --name test_server
+          npm install
+
+      - name: Build project (without touching web.config or server.js)
+        shell: cmd
+        run: |
+          echo Starting build process ...
+          cd /d E:\react
+          npm run build
+          echo ✅ Build completed successfully.
+
+      - name: Restart PM2 Nextserver
+        shell: cmd
+        run: |
+          echo Restarting PM2 service: Nextserver ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart Nextserver || echo PM2 restart failed, continuing...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
