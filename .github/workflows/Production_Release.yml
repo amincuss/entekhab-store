@@ -26,7 +26,9 @@ jobs:
         run: |
           cd /d E:\store
           echo Installing npm packages...
-          npm install
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart Nextserver || echo PM2 restart failed, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
 
       - name: Restart PM2 store_server
         shell: cmd
