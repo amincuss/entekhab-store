@@ -1,5 +1,4 @@
-name: Auto_Build_React_on_Main
-
+name: Test_server
 on:
   push:
     branches:
