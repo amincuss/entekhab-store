@@ -52,3 +52,20 @@ export interface SubmitOrderPayload {
   agencyCode: number;
   productId: number;
 }
+
+export interface TOrder {
+  Title: string | null;
+  Description: string;
+  Status: number;
+  TransactionDate: string; // می‌تونی بعداً به Date تبدیل کنی
+  Price: number;
+}
+
+export interface TStatus {
+  Id: number;
+  Title: string;
+}
+export interface TGetServicerOrders {
+  Orders: TOrder[];
+  Statuses: TStatus[];
+}

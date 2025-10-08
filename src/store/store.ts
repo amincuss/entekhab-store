@@ -3,12 +3,14 @@ import themeReducer from "./slices/themeSlice";
 import rewardsReducer from "../features/ServicerClub/redux/rewardsSlice";
 import userReducer from "../features/ServicerClub/redux/userSlice";
 import authReducer from "./slices/authSlice";
+import ordersReduser from "../features/ServicerClub/redux/orderSlice";
 export const store = configureStore({
   reducer: {
     theme: themeReducer,
     rewards: rewardsReducer,
     user: userReducer,
     auth: authReducer,
+    orders: ordersReduser,
   },
 });
 

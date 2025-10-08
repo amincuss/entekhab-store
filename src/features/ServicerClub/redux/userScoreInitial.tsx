@@ -6,24 +6,22 @@ import { useEffect } from "react";
 import { setUserScore } from "./userSlice";
 import { useGetScoreList } from "../hooks/useGetScoreList";
 
-interface UserScoreInitializerProps {
-  page?: number;
-}
+// interface UserScoreInitializerProps {
+//   // you can remove page because infinite query handles it internally
+// }
 
-export function UserInitializer({ page = 1 }: UserScoreInitializerProps) {
+export function UserInitializer({}) {
   const dispatch = useDispatch();
-  const initialAgencyCode = useSelector(
-    (state: RootState) => state.auth.agencyCode
-  );
   const agencyCode = useSelector((state: RootState) => state.auth.agencyCode);
 
-  const { data, isSuccess } = useGetScoreList(page, agencyCode as string, {
-    enabled: !!initialAgencyCode,
+  const { data, isSuccess } = useGetScoreList(agencyCode as string, {
+    enabled: !!agencyCode,
   });
 
   useEffect(() => {
-    if (isSuccess && data?.ScoreList?.length != null) {
-      dispatch(setUserScore(data.ScoreList[0].Count));
+    if (isSuccess && data?.pages?.[0]?.ScoreList?.length) {
+      // get the first item of the first page
+      dispatch(setUserScore(data.pages[0].ScoreList[0].Count));
     }
   }, [isSuccess, data, dispatch]);
 

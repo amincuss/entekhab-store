@@ -64,7 +64,7 @@ function SearchBar() {
     }).filter((group) => group.items.length > 0); // فقط دسته‌هایی که محصول دارند
 
     return (
-      <div className="!bg-gray-50 max-h-72 rounded-md overflow-auto mx-2 p-2 border border-gray-200 z-10 absolute top-[95%] left-0 right-0">
+      <div className="!bg-gray-50 max-h-72 rounded-md overflow-auto mx-2 border border-gray-200 z-10 absolute top-[95%] left-0 right-0">
         {grouped.length > 0 ? (
           grouped.map((group, index) => (
             <Accordion
@@ -112,7 +112,7 @@ function SearchBar() {
     );
   }
   return (
-    <div className="w-full relative p-2">
+    <div className="w-full relative">
       <div className="rounded-md flex items-center w-full border border-gray-100 bg-gray-100 p-2 text-xs">
         <InputBase
           id="search"

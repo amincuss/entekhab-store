@@ -1,7 +1,13 @@
 import { axiosInstance } from "@/lib/axiosInstance";
 import { ApiResponse } from "@/shared/types/api";
-import { SliderItem, SubmitOrderPayload, TGetScoreList, TGetServicerCurrentScore, TProductList } from "../type";
-
+import {
+  SliderItem,
+  SubmitOrderPayload,
+  TGetScoreList,
+  TGetServicerCurrentScore,
+  TGetServicerOrders,
+  TProductList,
+} from "../type";
 
 //دریافت امتیاز کاربر
 export const getServicerCurrentScore = (agencyCode: string) => {
@@ -28,18 +34,24 @@ export const getServicersClubSlides = () => {
 };
 
 //دریافت تاریخچه امتیاز ها
-export const getScoreList = (agencyCode: string, page: number) => {
-  return axiosInstance
-    .get<ApiResponse<TGetScoreList>>("/GetScoreList", {
+export const getScoreList = async (
+  agencyCode: string,
+  page: number
+): Promise<TGetScoreList> => {
+  const res = await axiosInstance.get<ApiResponse<TGetScoreList>>(
+    "/GetScoreList",
+    {
       params: { agencyCode, page },
-    })
-    .then((res) => {
-      if (!res.data.IsSuccess) {
-        throw new Error(res.data.Message || "خطای ناشناخته");
-      }
-      return res.data.Data; // فقط Data برگرده
-    });
+    }
+  );
+
+  if (!res.data.IsSuccess) {
+    throw new Error(res.data.Message || "خطای ناشناخته");
+  }
+
+  return res.data.Data;
 };
+
 
 //دریافت لیست دسته بندی ها و محصولات
 export const getProductList = () => {
@@ -60,4 +72,18 @@ export const submitOrder = async (payload: SubmitOrderPayload) => {
     { params: payload }
   );
   return data;
+};
+
+//دریافت وضعیت سفارش ها
+export const getServicerOrders = (agencyCode: string) => {
+  return axiosInstance
+    .get<ApiResponse<TGetServicerOrders>>("/GetServicerOrders", {
+      params: { agencyCode },
+    })
+    .then((res) => {
+      if (!res.data.IsSuccess) {
+        throw new Error(res.data.Message || "خطای ناشناخته");
+      }
+      return res.data;
+    });
 };

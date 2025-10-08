@@ -7,6 +7,10 @@ import { useDispatch } from "react-redux";
 import Loading from "../loading";
 import { useGetProductList } from "@/features/ServicerClub/hooks/useGetProductList";
 import { setData } from "@/features/ServicerClub/redux/rewardsSlice";
+import { useGetServicerData } from "@/shared/core/user/hooks";
+import { setUser } from "@/features/ServicerClub/redux/userSlice";
+import { useGetServicerOrders } from "@/features/ServicerClub/hooks/useGetServicerOrders";
+import { setOrder } from "@/features/ServicerClub/redux/orderSlice";
 
 interface StoreInitializerProp {
   children: React.ReactNode;
@@ -19,6 +23,10 @@ function StoreInitializer({ children, agencyCode }: StoreInitializerProp) {
       dispatch(setAgencyCode(agencyCode));
     }
   }, [agencyCode, dispatch]);
+
+  const { data: userData, isSuccess } = useGetServicerData(agencyCode ?? "", {
+    enabled: !!agencyCode,
+  });
 
   const {
     data: productData,
@@ -34,6 +42,13 @@ function StoreInitializer({ children, agencyCode }: StoreInitializerProp) {
     isSuccess: isSuccessCurrentScore,
   } = useGetServicerCurrentScore(agencyCode!);
 
+  const { data: orderData, isSuccess: isSuccessOrder } = useGetServicerOrders(
+    agencyCode,
+    {
+      enabled: !!agencyCode,
+    }
+  );
+
   // ذخیره داده‌ها در ریداکس
   useEffect(() => {
     if (productData) dispatch(setData(productData.Data));
@@ -44,6 +59,18 @@ function StoreInitializer({ children, agencyCode }: StoreInitializerProp) {
       dispatch(setCurrentScore(CurrentScore?.Data.Score));
     }
   }, [isSuccessCurrentScore, CurrentScore, dispatch]);
+
+  useEffect(() => {
+    if (isSuccess && userData?.IsSuccess && userData.Data) {
+      dispatch(setUser(userData.Data));
+    }
+  }, [isSuccess, userData, dispatch]);
+
+  useEffect(() => {
+    if (isSuccessOrder && orderData?.IsSuccess && orderData.Data) {
+      dispatch(setOrder(orderData.Data));
+    }
+  }, [isSuccessOrder, orderData, dispatch]);
 
   if (isLoadingCurrentScore || isLoadingProduct) return <Loading />;
 

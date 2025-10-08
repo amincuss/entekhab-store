@@ -1,64 +1,64 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { useGetScoreList } from "../../hooks/useGetScoreList";
 import HistoryList from "./HistoryList";
-import LoadMoreButton from "./LoadMoreButton";
 import { ScoreItem } from "../../type";
 import FilterButton from "./FilterButton";
-import Empty from "@/components/Empty";
-import Loading from "@/app/loading";
+import InfiniteScroll from "react-infinite-scroll-component";
+import Loading from "@/components/Loading";
+import { useGetScoreList } from "../../hooks/useGetScoreList";
 
 export type FilterType = "all" | "buy" | "receive";
 
 export default function HistoryPage() {
   const agencyCode = useSelector((state: RootState) => state.auth.agencyCode);
-  const [page, setPage] = useState(1);
-  const [allScores, setAllScores] = useState<ScoreItem[]>([]);
-  const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
 
-  const { data, isLoading, isFetching } = useGetScoreList(page, agencyCode!, {
-    enabled: !!agencyCode,
-  });
-  useEffect(() => {
-    if (data?.ScoreList) {
-      setAllScores((prev) => [...prev, ...data.ScoreList]);
-      if (data.ScoreList.length === 0) setHasMore(false);
-    }
-  }, [data]);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useGetScoreList(agencyCode!);
 
-  const loadMore = () => {
-    if (hasMore) setPage((prev) => prev + 1);
-  };
+  const allScores: ScoreItem[] =
+    data?.pages.flatMap((page) => page.ScoreList) ?? [];
+
   // فیلتر کردن امتیازها
   const filteredScores = allScores.filter((score: ScoreItem) => {
     if (filter === "all") return true;
     if (filter === "buy") return score.ScoreType === 2;
     if (filter === "receive") return score.ScoreType === 1;
   });
+
   return (
-    <>
-      {allScores ? (
-        <div className="h-full w-full flex flex-col px-2 py-3">
-          <FilterButton setFilter={setFilter} filter={filter} />
+    <div className="w-full flex flex-col px-2 pt-3">
+      <FilterButton setFilter={setFilter} filter={filter} />
+
+      <div
+        style={{
+          height: "calc(100vh - 210px)",
+          overflow: "auto",
+        }}
+        id="scrollableDiv"
+      >
+        <InfiniteScroll
+          dataLength={filteredScores.length}
+          next={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          hasMore={!!hasNextPage && !isFetchingNextPage && !!data}
+          loader={
+            <div className="flex justify-center items-center py-4 h-16 overflow-hidden">
+              <Loading />
+            </div>
+          }
+          scrollThreshold={0.9}
+          scrollableTarget="scrollableDiv"
+        >
           <HistoryList scores={filteredScores} />
-          {(hasMore || isLoading || isFetching) && (
-            <LoadMoreButton
-              onClick={loadMore}
-              isLoading={isFetching || isLoading}
-            />
-          )}
-        </div>
-      ) : !allScores ? (
-        <div className="h-full">
-          <Empty message="تاریخچه ای موجود نیست" />
-        </div>
-      ) : isLoading ? (
-        <Loading />
-      ) : null}
-    </>
+        </InfiniteScroll>
+      </div>
+    </div>
   );
 }

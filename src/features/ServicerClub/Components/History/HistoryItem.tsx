@@ -15,7 +15,7 @@ export default function HistoryItem({ item }: HistoryItemProps) {
     .format("dddd DD MMMM YYYY");
 
   return (
-    <div className=" rounded-md border-1 border-dashed border-gray-200 mb-2 px-3">
+    <div className=" rounded-md bg-white border-1 border-dashed border-gray-200 mb-2 px-3">
       <header className="py-3 border-b border-dotted border-gray-100 font-medium text-gray-500 text-[10px] flex justify-between">
         <span>{persianDate}</span>
         <div className="flex items-center gap-1 text-xs text-primary font-bold">
