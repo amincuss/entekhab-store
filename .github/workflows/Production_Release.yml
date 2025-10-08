@@ -19,11 +19,19 @@ jobs:
       - name: Stop PM2 test_server Production_server before copy
         shell: cmd
         run: |
-          echo Stopping PM2 service: test_server ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd"  stop test_server || echo Service not running, continuing...
-                    "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd"  stop Production_server || echo Service not running, continuing...
-
+          echo Stopping PM2 services ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Service not running, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop Production_server || echo Service not running, continuing...
+          
+          echo Current PM2 list:
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
+
+      - name: Kill all Node.js processes to release file locks
+        shell: cmd
+        run: |
+          echo Killing all node.exe processes ...
+          taskkill /F /IM node.exe || echo No Node.js process found.
+          timeout /T 3 /NOBREAK >nul
 
       - name: Copy updated files from E:\react to E:\store (overwrite only same names)
         shell: cmd
@@ -37,15 +45,15 @@ jobs:
             /LOG+:"E:\actions-runner\_work\release-copy.log" ^
             || exit /b 0
 
-          echo ✅ Release copy completed. Files with same name were overwritten, others untouched.
+          echo ✅ Release copy completed. Files with same name overwritten, others untouched.
           echo ❌ web.config و server.js عمداً کپی نشدند.
 
       - name: Restart PM2 test_server Production_server after copy
         shell: cmd
         run: |
           echo Restarting PM2 service: test_server ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd"  restart test_server || echo PM2 start failed, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd"  restart Production_server || echo PM2 start failed, continuing...
-
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart test_server || echo PM2 restart failed, continuing...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart Production_server || echo PM2 restart failed, continuing...
+          
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
