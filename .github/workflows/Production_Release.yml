@@ -2,58 +2,45 @@ name: Production_Release
 
 on:
   workflow_dispatch:
-    inputs:
-      confirm_release:
-        description: 'تأیید انتشار به E:\store ؟'
-        required: true
-        default: 'yes'
 
 jobs:
-  release-copy:
-    runs-on: self-hosted
-    env:
-      ACTIONS_STEP_DEBUG: true
-      CI: true
+  deploy:
+    runs-on: [self-hosted, windows]
 
     steps:
-      - name: Stop PM2 test_server Production_server before copy
+      - name: Stop PM2 service and kill Node.js processes
         shell: cmd
         run: |
-          echo Stopping PM2 services ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop test_server || echo Service not running, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop Production_server || echo Service not running, continuing...
+          echo Stopping PM2 services...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop all || echo PM2 stop failed or no process running.
           
-          echo Current PM2 list:
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
-
-      - name: Kill all Node.js processes to release file locks
-        shell: cmd
-        run: |
-          echo Killing all node.exe processes ...
+          echo Killing all node.exe processes...
+          tasklist | find /I "node.exe"
           taskkill /F /IM node.exe || echo No Node.js process found.
-          timeout /T 3 /NOBREAK >nul
+          timeout /T 2 > nul
 
-      - name: Copy updated files from E:\react to E:\store (overwrite only same names)
+      - name: Copy build files from E:\react to E:\store (overwrite only, no deletion)
         shell: cmd
         run: |
-          echo Starting selective overwrite from E:\react to E:\store ...
-          if not exist "E:\store" mkdir "E:\store"
+          echo Copying files...
+          robocopy "E:\react" "E:\store" /E /XO /COPY:DAT /R:3 /W:5 /XF server.js web.config /XD .git .github .next\cache docs tests || exit /b 0
+          echo Copy completed.
 
-          robocopy "E:\react" "E:\store" /E /COPY:DAT /R:3 /W:5 ^
-            /NFL /NDL /NP /TEE /V ^
-            /XF "web.config" "server.js" ^
-            /LOG+:"E:\actions-runner\_work\release-copy.log" ^
-            || exit /b 0
-
-          echo ✅ Release copy completed. Files with same name overwritten, others untouched.
-          echo ❌ web.config و server.js عمداً کپی نشدند.
-
-      - name: Restart PM2 test_server Production_server after copy
+      - name: Start PM2 service after success
+        if: success()
         shell: cmd
         run: |
-          echo Restarting PM2 service: test_server ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart test_server || echo PM2 restart failed, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart Production_server || echo PM2 restart failed, continuing...
-          
+          echo Starting PM2 services (success case)...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\store\server.js" --name test_server || echo PM2 start failed.
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
+
+      - name: Start PM2 service if workflow failed
+        if: failure()
+        shell: cmd
+        run: |
+          echo WARNING: Workflow failed! Restarting PM2 to keep service alive...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\store\server.js" --name test_server || echo PM2 start failed.
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
+
