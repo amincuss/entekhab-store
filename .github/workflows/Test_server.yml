@@ -11,7 +11,7 @@ jobs:
       CI: true
 
     steps:
-      - name: Navigate to project directory
+      - name: Navigate to project directorys
         shell: cmd
         run: |
           echo Changing directory to E:\react ...
