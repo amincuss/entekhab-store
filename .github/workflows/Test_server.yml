@@ -11,48 +11,66 @@ jobs:
       CI: true
 
     steps:
-      - name: Navigate to project directorys
+      # 1. تغییر مسیر به پوشه سورس اصلی
+      - name: Navigate to project directory
         shell: cmd
         run: |
-          echo Changing directory to E:\react ...
-          cd /d E:\react
+          echo Changing directory to E:\store ...
+          cd /d E:\store
 
+      # 2. بررسی وجود package.json و نصب دیپندنسی‌ها
       - name: Install dependencies
         shell: cmd
         run: |
+          cd /d E:\store
+          if not exist package.json (
+            echo ❌ package.json not found in E:\store
+            exit /b 1
+          )
           echo Running npm install ...
-          cd /d E:\react
           npm install
 
+      # 3. بیلد پروژه
       - name: Build project (without touching web.config or server.js)
         shell: cmd
         run: |
-          echo Starting build process ...
-          cd /d E:\react
+          cd /d E:\store
           npm run build
           echo ✅ Build completed successfully.
 
-      - name: Ensure PM2 Daemon is running and restart Nextserver
+      # 4. ری‌استارت مقاوم PM2
+      - name: Ensure PM2 Daemon is running and restart NextServer
         shell: cmd
         run: |
-          echo Checking PM2 Daemon ...
+          REM ست کردن مسیر PM2 برای این یوزر
           set PM2_HOME=%USERPROFILE%\.pm2
           set PATH=%PATH%;%USERPROFILE%\AppData\Roaming\npm
 
-          echo Checking if PM2 Daemon is alive ...
+          echo Checking PM2 Daemon ...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" ping || (
-            echo PM2 Daemon not running, starting it ...
+            echo PM2 Daemon not running, starting...
             "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" resurrect || (
-              echo Resurrect failed, starting new PM2 daemon ...
-              "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\react\server.js" --name Nextserver
+              echo Resurrect failed, starting manually...
+              "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\store\server.js" --name NextServer
             )
           )
 
-          echo Restarting PM2 service: Nextserver ...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart NextServer || echo PM2 restart failed, continuing...
+          echo Restarting PM2 service: NextServer ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart NextServer || (
+            echo Process not found, starting manually...
+            "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\store\server.js" --name NextServer
+          )
 
-          echo Saving PM2 process list ...
+          REM کمی صبر تا پروسه بالا بیاد
+          timeout /T 2 >nul
+
+          REM چاپ وضعیت سرویس در لاگ Actions
+          echo ---- PM2 STATUS CHECK ----
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" describe NextServer | find "status"
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" describe NextServer | find "uptime"
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" describe NextServer | find "restarts"
+
+          REM ذخیره لیست پروسه‌ها برای resurrect دفعات بعد
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
-
-          echo Current PM2 list:
+          echo ---- CURRENT PM2 LIST ----
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
