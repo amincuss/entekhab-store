@@ -21,17 +21,17 @@ jobs:
             /XF web.config server.js ^
             || exit /b 0
 
-      - name: Run npm install in E:\store
+      - name: Install npm packages in E:\store
         shell: cmd
         run: |
           cd /d E:\store
           echo Installing npm packages...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart NextServer || echo PM2 restart failed, continuing...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
+          npm install
 
-      - name: Restart PM2 store_server
+      - name: Restart PM2 NextServer
         shell: cmd
         run: |
-          echo Restarting PM2 service...
-          pm2 restart NextServer || exit /b 0
+          echo Restarting PM2 service: store_server ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart NextServer || exit /b 0
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
