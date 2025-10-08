@@ -1,4 +1,4 @@
-name: Copy React to Store and Install
+name: Production_server
 
 on:
   workflow_dispatch:
