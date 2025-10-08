@@ -1,4 +1,5 @@
-name: Test_server
+name: Auto_Build_React_on_Main
+
 on:
   push:
     branches:
@@ -32,10 +33,27 @@ jobs:
           npm run build
           echo ✅ Build completed successfully.
 
-      - name: Restart PM2 Nextserver
+      - name: Ensure PM2 Daemon is running and restart Nextserver
         shell: cmd
         run: |
+          echo Checking PM2 Daemon ...
+          set PM2_HOME=%USERPROFILE%\.pm2
+          set PATH=%PATH%;%USERPROFILE%\AppData\Roaming\npm
+
+          echo Checking if PM2 Daemon is alive ...
+          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" ping || (
+            echo PM2 Daemon not running, starting it ...
+            "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" resurrect || (
+              echo Resurrect failed, starting new PM2 daemon ...
+              "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\react\server.js" --name Nextserver
+            )
+          )
+
           echo Restarting PM2 service: Nextserver ...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" restart NextServer || echo PM2 restart failed, continuing...
+
+          echo Saving PM2 process list ...
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
+
+          echo Current PM2 list:
           "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
