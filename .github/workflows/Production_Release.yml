@@ -1,46 +1,35 @@
-name: Production_Release
+name: Copy React to Store and Install
 
 on:
   workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, windows]
-
+    runs-on: self-hosted
     steps:
-      - name: Stop PM2 service and kill Node.js processes
+      - name: Check Node.js version
         shell: cmd
         run: |
-          echo Stopping PM2 services...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" stop all || echo PM2 stop failed or no process running.
-          
-          echo Killing all node.exe processes...
-          tasklist | find /I "node.exe"
-          taskkill /F /IM node.exe || echo No Node.js process found.
-          timeout /T 2 > nul
+          node -v
 
-      - name: Copy build files from E:\react to E:\store (overwrite only, no deletion)
+      - name: Copy files from E:\react to E:\store (exclude node_modules, web.config, server.js)
         shell: cmd
         run: |
           echo Copying files...
-          robocopy "E:\react" "E:\store" /E /XO /COPY:DAT /R:3 /W:5 /XF server.js web.config /XD .git .github .next\cache docs tests || exit /b 0
-          echo Copy completed.
+          robocopy "E:\react" "E:\store" /E /XO /COPY:DAT ^
+            /XD node_modules ^
+            /XF web.config server.js ^
+            || exit /b 0
 
-      - name: Start PM2 service after success
-        if: success()
+      - name: Run npm install in E:\store
         shell: cmd
         run: |
-          echo Starting PM2 services (success case)...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\store\server.js" --name test_server || echo PM2 start failed.
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
+          cd /d E:\store
+          echo Installing npm packages...
+          npm install
 
-      - name: Start PM2 service if workflow failed
-        if: failure()
+      - name: Restart PM2 store_server
         shell: cmd
         run: |
-          echo WARNING: Workflow failed! Restarting PM2 to keep service alive...
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" start "E:\store\server.js" --name test_server || echo PM2 start failed.
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" save
-          "%USERPROFILE%\AppData\Roaming\npm\pm2.cmd" list
-
+          echo Restarting PM2 service...
+          pm2 restart NextServer || exit /b 0
